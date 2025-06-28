@@ -18,7 +18,7 @@ import {
   logToolCall,
   ToolCallEvent,
 } from '../index.js';
-import { Part, PartListUnion } from '@google/genai';
+import { Part, PartListUnion } from '../openai/openai-adapter.js';
 import { getResponseTextFromParts } from '../utils/generateContentResponseUtilities.js';
 import {
   isModifiableTool,
@@ -137,12 +137,17 @@ function createFunctionResponsePart(
 export function convertToFunctionResponse(
   toolName: string,
   callId: string,
-  llmContent: PartListUnion,
+  llmContent: PartListUnion | string,
 ): PartListUnion {
+  // Convert string to PartListUnion if needed
+  const contentArray = typeof llmContent === 'string' 
+    ? [{ text: llmContent }] 
+    : llmContent;
+    
   const contentToProcess =
-    Array.isArray(llmContent) && llmContent.length === 1
-      ? llmContent[0]
-      : llmContent;
+    Array.isArray(contentArray) && contentArray.length === 1
+      ? contentArray[0]
+      : contentArray;
 
   if (typeof contentToProcess === 'string') {
     return createFunctionResponsePart(callId, toolName, contentToProcess);

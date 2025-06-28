@@ -177,7 +177,7 @@ export interface ToolResult {
    * Content meant to be included in LLM history.
    * This should represent the factual outcome of the tool execution.
    */
-  llmContent: PartListUnion;
+  llmContent: PartListUnion | string;
 
   /**
    * Markdown string for user display.

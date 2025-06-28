@@ -11,7 +11,7 @@ import {
   ToolConfirmationOutcome,
   ToolMcpConfirmationDetails,
 } from './tools.js';
-import { CallableTool, Part, FunctionCall } from '@google/genai';
+import { CallableTool, Part, FunctionCall } from '../openai/openai-adapter.js';
 
 type ToolParams = Record<string, unknown>;
 

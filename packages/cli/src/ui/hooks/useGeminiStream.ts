@@ -25,7 +25,7 @@ import {
   UnauthorizedError,
   UserPromptEvent,
 } from '@google/gemini-cli-core';
-import { type Part, type PartListUnion } from '@google/gemini-cli-core/dist/openai/openai-adapter.js';
+import { type Part, type PartListUnion } from '@google/gemini-cli-core/dist/src/openai/openai-adapter.js';
 import {
   StreamingState,
   HistoryItem,

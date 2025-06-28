@@ -16,7 +16,7 @@ import {
   DEFAULT_ENCODING,
   getSpecificMimeType,
 } from '../utils/fileUtils.js';
-import { PartListUnion } from '@google/genai';
+import { PartListUnion } from '../openai/openai-adapter.js';
 import { Config } from '../config/config.js';
 import {
   recordFileOperationMetric,

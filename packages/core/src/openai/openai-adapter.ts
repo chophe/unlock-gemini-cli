@@ -8,7 +8,7 @@ import OpenAI from 'openai';
 
 // Type definitions to match the original GenAI interface
 export interface Content {
-  role: 'user' | 'model' | 'system';
+  role: 'user' | 'model' | 'system' | 'assistant' | string;
   parts: Part[];
 }
 
@@ -19,6 +19,10 @@ export interface Part {
   inlineData?: {
     mimeType: string;
     data: string;
+  };
+  fileData?: {
+    mimeType: string;
+    fileUri: string;
   };
   thought?: string; // For thinking/reasoning parts
 }
@@ -83,11 +87,12 @@ export interface GenerateContentConfig {
   topK?: number;
   maxOutputTokens?: number;
   stopSequences?: string[];
-  systemInstruction?: Content;
+  systemInstruction?: Content | string;
   tools?: Tool[];
   responseMimeType?: string;
   responseSchema?: SchemaUnion;
   thinkingConfig?: ThinkingConfig;
+  abortSignal?: AbortSignal;
   
   // Additional properties for compatibility
   cachedContent?: any;
@@ -130,6 +135,8 @@ export interface EmbedContentResponse {
 
 export interface Tool {
   functionDeclarations: FunctionDeclaration[];
+  urlContext?: any; // For web-fetch tool compatibility
+  googleSearch?: any; // For web-search tool compatibility
 }
 
 export interface FunctionDeclaration {
@@ -145,6 +152,9 @@ export interface SchemaUnion {
   required?: string[];
   enum?: string[];
   description?: string;
+  anyOf?: SchemaUnion[]; // For MCP compatibility
+  default?: any; // For default values
+  [key: string]: unknown; // Index signature for additional properties
 }
 
 export type PartListUnion = Part[];
@@ -162,6 +172,14 @@ export interface GroundingMetadata {
       title?: string;
     };
   }>;
+  groundingSupports?: Array<{
+    segment?: {
+      startIndex?: number;
+      endIndex?: number;
+    };
+    groundingChunkIndices?: number[];
+    confidenceScores?: number[];
+  }>;
 }
 
 export enum Type {
@@ -177,6 +195,8 @@ export interface CallableTool {
   name: string;
   description: string;
   inputSchema: SchemaUnion;
+  tool?: any; // For MCP tool compatibility
+  callTool?: (params: any) => Promise<any>; // For MCP tool execution
 }
 
 // OpenAI Content Generator Implementation
@@ -197,10 +217,15 @@ export class OpenAIContentGenerator {
       
       // Add system instruction if provided
       if (request.config?.systemInstruction) {
-        const systemContent = request.config.systemInstruction.parts
-          .map(part => part.text)
-          .filter(Boolean)
-          .join('\n');
+        let systemContent: string;
+        if (typeof request.config.systemInstruction === 'string') {
+          systemContent = request.config.systemInstruction;
+        } else {
+          systemContent = request.config.systemInstruction.parts
+            .map(part => part.text)
+            .filter(Boolean)
+            .join('\n');
+        }
         if (systemContent) {
           messages.unshift({ role: 'system', content: systemContent });
         }
@@ -237,10 +262,15 @@ export class OpenAIContentGenerator {
       
       // Add system instruction if provided
       if (request.config?.systemInstruction) {
-        const systemContent = request.config.systemInstruction.parts
-          .map(part => part.text)
-          .filter(Boolean)
-          .join('\n');
+        let systemContent: string;
+        if (typeof request.config.systemInstruction === 'string') {
+          systemContent = request.config.systemInstruction;
+        } else {
+          systemContent = request.config.systemInstruction.parts
+            .map(part => part.text)
+            .filter(Boolean)
+            .join('\n');
+        }
         if (systemContent) {
           messages.unshift({ role: 'system', content: systemContent });
         }
@@ -316,7 +346,16 @@ export class OpenAIContentGenerator {
 
   private convertContentsToMessages(contents: Content[]): OpenAI.Chat.ChatCompletionMessageParam[] {
     return contents.map(content => {
-      const role = content.role === 'model' ? 'assistant' : content.role as 'user' | 'system' | 'assistant';
+      // Ensure role is properly typed
+      let role: 'user' | 'system' | 'assistant';
+      if (content.role === 'model') {
+        role = 'assistant';
+      } else if (content.role === 'user' || content.role === 'system' || content.role === 'assistant') {
+        role = content.role;
+      } else {
+        // Handle string roles that might come from legacy code
+        role = content.role === 'assistant' ? 'assistant' : 'user';
+      }
       
       if (content.parts.some(part => part.functionCall || part.functionResponse)) {
         // Handle function calls and responses
@@ -499,6 +538,16 @@ export function createUserContent(message: Part | PartListUnion): Content {
     role: 'user',
     parts,
   };
+}
+
+// Helper function to convert string to Part array for backward compatibility
+export function stringToParts(text: string): Part[] {
+  return [{ text }];
+}
+
+// Helper function to convert string to PartListUnion
+export function stringToPartListUnion(text: string): PartListUnion {
+  return [{ text }];
 }
 
 export interface SpeechConfigUnion {

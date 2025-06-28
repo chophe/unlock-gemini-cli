@@ -9,7 +9,7 @@ import { StringDecoder } from 'string_decoder';
 import type { HistoryItemWithoutId } from '../types.js';
 import { useCallback } from 'react';
 import { Config, GeminiClient } from '@google/gemini-cli-core';
-import { type PartListUnion } from '@google/gemini-cli-core/dist/openai/openai-adapter.js';
+import { type PartListUnion } from '@google/gemini-cli-core/dist/src/openai/openai-adapter.js';
 import { formatMemoryUsage } from '../utils/formatters.js';
 import { isBinary } from '../utils/textUtils.js';
 import { UseHistoryManagerReturn } from './useHistoryManager.js';

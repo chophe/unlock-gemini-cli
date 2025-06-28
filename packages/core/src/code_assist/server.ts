@@ -20,7 +20,7 @@ import {
   EmbedContentResponse,
   GenerateContentParameters,
   GenerateContentResponse,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 import * as readline from 'readline';
 import { ContentGenerator } from '../core/contentGenerator.js';
 import {

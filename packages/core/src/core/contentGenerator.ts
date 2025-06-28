@@ -38,6 +38,7 @@ export enum AuthType {
   LOGIN_WITH_GOOGLE_PERSONAL = 'oauth-personal',
   USE_OPENAI = 'openai-api-key',
   USE_VERTEX_AI = 'vertex-ai',
+  USE_GEMINI = 'openai-api-key', // Backward compatibility - maps to OpenAI
 }
 
 export type ContentGeneratorConfig = {
