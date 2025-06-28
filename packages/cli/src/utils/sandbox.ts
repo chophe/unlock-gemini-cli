@@ -517,11 +517,19 @@ export async function start_sandbox(
     args.push('--env', `GOOGLE_API_KEY=${process.env.GOOGLE_API_KEY}`);
   }
 
-  // copy GOOGLE_GENAI_USE_VERTEXAI
-  if (process.env.GOOGLE_GENAI_USE_VERTEXAI) {
+  // copy OPENAI_API_KEY
+  if (process.env.OPENAI_API_KEY) {
     args.push(
       '--env',
-      `GOOGLE_GENAI_USE_VERTEXAI=${process.env.GOOGLE_GENAI_USE_VERTEXAI}`,
+      `OPENAI_API_KEY=${process.env.OPENAI_API_KEY}`,
+    );
+  }
+
+  // copy OPENAI_BASE_URL
+  if (process.env.OPENAI_BASE_URL) {
+    args.push(
+      '--env',
+      `OPENAI_BASE_URL=${process.env.OPENAI_BASE_URL}`,
     );
   }
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Content } from '@google/genai';
+import { Content } from '../openai/openai-adapter.js';
 
 export function isFunctionResponse(content: Content): boolean {
   return (

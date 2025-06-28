@@ -5,8 +5,8 @@
  */
 
 import {
-  DEFAULT_GEMINI_MODEL,
-  DEFAULT_GEMINI_FLASH_MODEL,
+  DEFAULT_OPENAI_MODEL,
+  DEFAULT_OPENAI_FLASH_MODEL,
 } from '../config/models.js';
 
 /**
@@ -21,31 +21,33 @@ export async function getEffectiveModel(
   apiKey: string,
   currentConfiguredModel: string,
 ): Promise<string> {
-  if (currentConfiguredModel !== DEFAULT_GEMINI_MODEL) {
+  if (currentConfiguredModel !== DEFAULT_OPENAI_MODEL) {
     // Only check if the user is trying to use the specific pro model we want to fallback from.
     return currentConfiguredModel;
   }
 
-  const modelToTest = DEFAULT_GEMINI_MODEL;
-  const fallbackModel = DEFAULT_GEMINI_FLASH_MODEL;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToTest}:generateContent?key=${apiKey}`;
+  const modelToTest = DEFAULT_OPENAI_MODEL;
+  const fallbackModel = DEFAULT_OPENAI_FLASH_MODEL;
+  const baseURL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+  const endpoint = `${baseURL}/chat/completions`;
+  
   const body = JSON.stringify({
-    contents: [{ parts: [{ text: 'test' }] }],
-    generationConfig: {
-      maxOutputTokens: 1,
-      temperature: 0,
-      topK: 1,
-      thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
-    },
+    model: modelToTest,
+    messages: [{ role: 'user', content: 'test' }],
+    max_tokens: 1,
+    temperature: 0,
   });
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2000); // 500ms timeout for the request
+  const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout for the request
 
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body,
       signal: controller.signal,
     });

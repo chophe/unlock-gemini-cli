@@ -13,7 +13,7 @@ import {
   Content,
   Tool,
   GenerateContentResponse,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 import { getFolderStructure } from '../utils/getFolderStructure.js';
 import {
   Turn,
@@ -37,11 +37,11 @@ import {
   createContentGenerator,
 } from './contentGenerator.js';
 import { ProxyAgent, setGlobalDispatcher } from 'undici';
-import { DEFAULT_GEMINI_FLASH_MODEL } from '../config/models.js';
+import { DEFAULT_OPENAI_FLASH_MODEL } from '../config/models.js';
 import { AuthType } from './contentGenerator.js';
 
 function isThinkingSupported(model: string) {
-  if (model.startsWith('gemini-2.5')) return true;
+  if (model.startsWith('gpt-4') || model.startsWith('o1')) return true;
   return false;
 }
 
@@ -253,7 +253,7 @@ export class GeminiClient {
     contents: Content[],
     schema: SchemaUnion,
     abortSignal: AbortSignal,
-    model: string = DEFAULT_GEMINI_FLASH_MODEL,
+    model: string = DEFAULT_OPENAI_FLASH_MODEL,
     config: GenerateContentConfig = {},
   ): Promise<Record<string, unknown>> {
     try {
@@ -510,7 +510,7 @@ export class GeminiClient {
     }
 
     const currentModel = this.model;
-    const fallbackModel = DEFAULT_GEMINI_FLASH_MODEL;
+    const fallbackModel = DEFAULT_OPENAI_FLASH_MODEL;
 
     // Don't fallback if already using Flash model
     if (currentModel === fallbackModel) {

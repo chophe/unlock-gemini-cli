@@ -6,7 +6,7 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { PartListUnion, PartUnion } from '@google/genai';
+import { PartListUnion, PartUnion } from '@google/gemini-cli-core/dist/openai/openai-adapter.js';
 import {
   Config,
   getErrorMessage,

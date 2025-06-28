@@ -11,10 +11,10 @@ import {
   CountTokensParameters,
   EmbedContentResponse,
   EmbedContentParameters,
-  GoogleGenAI,
-} from '@google/genai';
+  OpenAIContentGenerator,
+} from '../openai/openai-adapter.js';
 import { createCodeAssistContentGenerator } from '../code_assist/codeAssist.js';
-import { DEFAULT_GEMINI_MODEL } from '../config/models.js';
+import { DEFAULT_OPENAI_MODEL } from '../config/models.js';
 import { getEffectiveModel } from './modelCheck.js';
 
 /**
@@ -36,13 +36,14 @@ export interface ContentGenerator {
 
 export enum AuthType {
   LOGIN_WITH_GOOGLE_PERSONAL = 'oauth-personal',
-  USE_GEMINI = 'gemini-api-key',
+  USE_OPENAI = 'openai-api-key',
   USE_VERTEX_AI = 'vertex-ai',
 }
 
 export type ContentGeneratorConfig = {
   model: string;
   apiKey?: string;
+  baseURL?: string;
   vertexai?: boolean;
   authType?: AuthType | undefined;
 };
@@ -52,13 +53,14 @@ export async function createContentGeneratorConfig(
   authType: AuthType | undefined,
   config?: { getModel?: () => string },
 ): Promise<ContentGeneratorConfig> {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  const openaiBaseURL = process.env.OPENAI_BASE_URL;
   const googleApiKey = process.env.GOOGLE_API_KEY;
   const googleCloudProject = process.env.GOOGLE_CLOUD_PROJECT;
   const googleCloudLocation = process.env.GOOGLE_CLOUD_LOCATION;
 
   // Use runtime model from config if available, otherwise fallback to parameter or default
-  const effectiveModel = config?.getModel?.() || model || DEFAULT_GEMINI_MODEL;
+  const effectiveModel = config?.getModel?.() || model || DEFAULT_OPENAI_MODEL;
 
   const contentGeneratorConfig: ContentGeneratorConfig = {
     model: effectiveModel,
@@ -70,8 +72,9 @@ export async function createContentGeneratorConfig(
     return contentGeneratorConfig;
   }
 
-  if (authType === AuthType.USE_GEMINI && geminiApiKey) {
-    contentGeneratorConfig.apiKey = geminiApiKey;
+  if (authType === AuthType.USE_OPENAI && openaiApiKey) {
+    contentGeneratorConfig.apiKey = openaiApiKey;
+    contentGeneratorConfig.baseURL = openaiBaseURL;
     contentGeneratorConfig.model = await getEffectiveModel(
       contentGeneratorConfig.apiKey,
       contentGeneratorConfig.model,
@@ -108,21 +111,30 @@ export async function createContentGenerator(
       'User-Agent': `GeminiCLI/${version} (${process.platform}; ${process.arch})`,
     },
   };
+  
   if (config.authType === AuthType.LOGIN_WITH_GOOGLE_PERSONAL) {
     return createCodeAssistContentGenerator(httpOptions, config.authType);
   }
 
-  if (
-    config.authType === AuthType.USE_GEMINI ||
-    config.authType === AuthType.USE_VERTEX_AI
-  ) {
-    const googleGenAI = new GoogleGenAI({
+  if (config.authType === AuthType.USE_OPENAI) {
+    const openaiGenerator = new OpenAIContentGenerator({
       apiKey: config.apiKey === '' ? undefined : config.apiKey,
-      vertexai: config.vertexai,
+      baseURL: config.baseURL,
       httpOptions,
     });
 
-    return googleGenAI.models;
+    return openaiGenerator;
+  }
+
+  if (config.authType === AuthType.USE_VERTEX_AI) {
+    // For now, we'll use OpenAI for Vertex AI as well, but you could implement a separate Vertex AI adapter
+    const openaiGenerator = new OpenAIContentGenerator({
+      apiKey: config.apiKey === '' ? undefined : config.apiKey,
+      baseURL: config.baseURL || 'https://generativelanguage.googleapis.com/v1beta',
+      httpOptions,
+    });
+
+    return openaiGenerator;
   }
 
   throw new Error(

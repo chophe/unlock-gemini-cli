@@ -6,7 +6,7 @@
 
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import { Content } from '@google/genai';
+import { Content } from '../openai/openai-adapter.js';
 import { getProjectTempDir } from '../utils/paths.js';
 
 const LOG_FILE_NAME = 'logs.json';

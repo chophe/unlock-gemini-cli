@@ -27,7 +27,7 @@ import {
   ThinkingConfig,
   ToolListUnion,
   ToolConfig,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 
 export interface CAGenerateContentRequest {
   model: string;

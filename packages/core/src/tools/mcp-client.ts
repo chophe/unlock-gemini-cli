@@ -16,7 +16,7 @@ import {
   FunctionDeclaration,
   mcpToTool,
   Schema,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 import { ToolRegistry } from './tool-registry.js';
 
 export const MCP_DEFAULT_TIMEOUT_MSEC = 10 * 60 * 1000; // default to 10 minutes

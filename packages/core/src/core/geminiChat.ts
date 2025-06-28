@@ -15,7 +15,7 @@ import {
   createUserContent,
   Part,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 import { retryWithBackoff } from '../utils/retry.js';
 import { isFunctionResponse } from '../utils/messageInspectors.js';
 import { ContentGenerator, AuthType } from './contentGenerator.js';

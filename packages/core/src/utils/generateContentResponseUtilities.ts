@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GenerateContentResponse, Part, FunctionCall } from '@google/genai';
+import { GenerateContentResponse, Part, FunctionCall } from '../openai/openai-adapter.js';
 
 export function getResponseText(
   response: GenerateContentResponse,

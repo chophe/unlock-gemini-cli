@@ -10,7 +10,7 @@ import {
   FunctionCall,
   FunctionDeclaration,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
+} from '../openai/openai-adapter.js';
 import {
   ToolCallConfirmationDetails,
   ToolResult,

@@ -17,7 +17,7 @@ import {
   Part,
   FunctionCall,
   GenerateContentResponse,
-} from '@google/genai';
+} from '@google/gemini-cli-core/dist/openai/openai-adapter.js';
 
 import { parseAndFormatApiError } from './ui/utils/errorParsing.js';
 

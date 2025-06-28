@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { PartUnion } from '@google/genai';
+import { PartUnion } from '../openai/openai-adapter.js';
 import mime from 'mime-types';
 
 // Constants for text file processing

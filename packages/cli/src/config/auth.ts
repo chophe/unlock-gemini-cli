@@ -26,9 +26,7 @@ export const validateAuthMethod = (authMethod: string): string | null => {
     const hasGoogleApiKey = !!process.env.GOOGLE_API_KEY;
     if (!hasVertexProjectLocationConfig && !hasGoogleApiKey) {
       return (
-        'Must specify GOOGLE_GENAI_USE_VERTEXAI=true and either:\n' +
-        '• GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION environment variables.\n' +
-        '• GOOGLE_API_KEY environment variable (if using express mode).\n' +
+        'Must specify OPENAI_API_KEY environment variable or OPENAI_BASE_URL for custom endpoints.\n' +
         'Update your .env and try again, no reload needed!'
       );
     }
