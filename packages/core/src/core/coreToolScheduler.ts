@@ -150,7 +150,7 @@ export function convertToFunctionResponse(
       : contentArray;
 
   if (typeof contentToProcess === 'string') {
-    return createFunctionResponsePart(callId, toolName, contentToProcess);
+    return [createFunctionResponsePart(callId, toolName, contentToProcess)];
   }
 
   if (Array.isArray(contentToProcess)) {
@@ -169,10 +169,10 @@ export function convertToFunctionResponse(
         getResponseTextFromParts(
           contentToProcess.functionResponse.response.content as Part[],
         ) || '';
-      return createFunctionResponsePart(callId, toolName, stringifiedOutput);
+      return [createFunctionResponsePart(callId, toolName, stringifiedOutput)];
     }
     // It's a functionResponse that we should pass through as is.
-    return contentToProcess;
+    return [contentToProcess];
   }
 
   if (contentToProcess.inlineData || contentToProcess.fileData) {
@@ -189,15 +189,15 @@ export function convertToFunctionResponse(
   }
 
   if (contentToProcess.text !== undefined) {
-    return createFunctionResponsePart(callId, toolName, contentToProcess.text);
+    return [createFunctionResponsePart(callId, toolName, contentToProcess.text)];
   }
 
   // Default case for other kinds of parts.
-  return createFunctionResponsePart(
+  return [createFunctionResponsePart(
     callId,
     toolName,
     'Tool execution succeeded.',
-  );
+  )];
 }
 
 const createErrorResponse = (
@@ -206,13 +206,13 @@ const createErrorResponse = (
 ): ToolCallResponseInfo => ({
   callId: request.callId,
   error,
-  responseParts: {
+  responseParts: [{
     functionResponse: {
       id: request.callId,
       name: request.name,
       response: { error: error.message },
     },
-  },
+  }],
   resultDisplay: error.message,
 });
 
@@ -356,7 +356,7 @@ export class CoreToolScheduler {
             status: 'cancelled',
             response: {
               callId: currentCall.request.callId,
-              responseParts: {
+              responseParts: [{
                 functionResponse: {
                   id: currentCall.request.callId,
                   name: currentCall.request.name,
@@ -364,7 +364,7 @@ export class CoreToolScheduler {
                     error: `[Operation Cancelled] Reason: ${auxiliaryData}`,
                   },
                 },
-              },
+              }],
               resultDisplay: undefined,
               error: undefined,
             },

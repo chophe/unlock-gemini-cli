@@ -19,7 +19,7 @@ export function partListUnionToString(value: PartListUnion): string {
   }
 
   if (Array.isArray(value)) {
-    return value.map(partListUnionToString).join('');
+    return value.map((part: Part) => partListUnionToString(part)).join('');
   }
 
   // Cast to Part, assuming it might contain project-specific fields

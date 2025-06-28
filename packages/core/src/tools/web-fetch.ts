@@ -241,7 +241,10 @@ ${textContent}
     try {
       const response = await geminiClient.generateContent(
         [{ role: 'user', parts: [{ text: userPrompt }] }],
-        { tools: [{ urlContext: {} }] },
+        { tools: [{ 
+          functionDeclarations: [],
+          urlContext: {} 
+        }] },
         signal, // Pass signal
       );
 

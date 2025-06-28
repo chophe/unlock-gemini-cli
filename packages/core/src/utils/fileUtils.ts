@@ -182,7 +182,7 @@ export async function processSingleFileContent(
     if (!fs.existsSync(filePath)) {
       // Sync check is acceptable before async read
       return {
-        llmContent: '',
+        llmContent: { text: '' },
         returnDisplay: 'File not found.',
         error: `File not found: ${filePath}`,
       };
@@ -190,7 +190,7 @@ export async function processSingleFileContent(
     const stats = fs.statSync(filePath); // Sync check
     if (stats.isDirectory()) {
       return {
-        llmContent: '',
+        llmContent: { text: '' },
         returnDisplay: 'Path is a directory.',
         error: `Path is a directory, not a file: ${filePath}`,
       };
@@ -204,7 +204,7 @@ export async function processSingleFileContent(
     switch (fileType) {
       case 'binary': {
         return {
-          llmContent: `Cannot display content of binary file: ${relativePathForDisplay}`,
+          llmContent: { text: `Cannot display content of binary file: ${relativePathForDisplay}` },
           returnDisplay: `Skipped binary file: ${relativePathForDisplay}`,
         };
       }
@@ -245,7 +245,7 @@ export async function processSingleFileContent(
         llmTextContent += formattedLines.join('\n');
 
         return {
-          llmContent: llmTextContent,
+          llmContent: { text: llmTextContent },
           returnDisplay: isTruncated ? '(truncated)' : '',
           isTruncated,
           originalLineCount,
@@ -270,7 +270,7 @@ export async function processSingleFileContent(
         // Should not happen with current detectFileType logic
         const exhaustiveCheck: never = fileType;
         return {
-          llmContent: `Unhandled file type: ${exhaustiveCheck}`,
+          llmContent: { text: `Unhandled file type: ${exhaustiveCheck}` },
           returnDisplay: `Skipped unhandled file type: ${relativePathForDisplay}`,
           error: `Unhandled file type for ${filePath}`,
         };
@@ -282,7 +282,7 @@ export async function processSingleFileContent(
       .relative(rootDirectory, filePath)
       .replace(/\\/g, '/');
     return {
-      llmContent: `Error reading file ${displayPath}: ${errorMessage}`,
+      llmContent: { text: `Error reading file ${displayPath}: ${errorMessage}` },
       returnDisplay: `Error reading file ${displayPath}: ${errorMessage}`,
       error: `Error reading file ${filePath}: ${errorMessage}`,
     };

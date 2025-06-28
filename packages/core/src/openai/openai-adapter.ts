@@ -345,7 +345,9 @@ export class OpenAIContentGenerator {
   }
 
   private convertContentsToMessages(contents: Content[]): OpenAI.Chat.ChatCompletionMessageParam[] {
-    return contents.map(content => {
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+    
+    contents.forEach(content => {
       // Ensure role is properly typed
       let role: 'user' | 'system' | 'assistant';
       if (content.role === 'model') {
@@ -364,7 +366,7 @@ export class OpenAIContentGenerator {
         const functionResponses = content.parts.filter(part => part.functionResponse);
 
         if (functionCalls.length > 0) {
-          return {
+          messages.push({
             role: 'assistant',
             content: textParts.map(part => part.text).join('\n') || null,
             tool_calls: functionCalls.map(part => ({
@@ -375,30 +377,34 @@ export class OpenAIContentGenerator {
                 arguments: JSON.stringify(part.functionCall!.args),
               },
             })),
-          };
+          });
         }
 
         if (functionResponses.length > 0) {
           // For function responses, we need to create tool messages
-          return functionResponses.map(part => ({
-            role: 'tool' as const,
-            tool_call_id: `call_${Math.random().toString(36).substr(2, 9)}`,
-            content: JSON.stringify(part.functionResponse!.response),
-          }));
+          functionResponses.forEach(part => {
+            messages.push({
+              role: 'tool' as const,
+              tool_call_id: `call_${Math.random().toString(36).substr(2, 9)}`,
+              content: JSON.stringify(part.functionResponse!.response),
+            });
+          });
         }
+      } else {
+        const content_text = content.parts
+          .map(part => {
+            if (part.text) return part.text;
+            if (part.inlineData) return `[${part.inlineData.mimeType} data]`;
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n');
+
+        messages.push({ role, content: content_text });
       }
-
-      const content_text = content.parts
-        .map(part => {
-          if (part.text) return part.text;
-          if (part.inlineData) return `[${part.inlineData.mimeType} data]`;
-          return '';
-        })
-        .filter(Boolean)
-        .join('\n');
-
-      return { role, content: content_text };
-    }).flat();
+    });
+    
+    return messages;
   }
 
   private convertToolsToOpenAI(tools: Tool[]): OpenAI.Chat.ChatCompletionTool[] {

@@ -415,19 +415,19 @@ Use this tool when the user's query implies needing the content of several files
           reason: `Read error: ${fileReadResult.error}`,
         });
       } else {
-        if (typeof fileReadResult.llmContent === 'string') {
+        if (fileReadResult.llmContent.text !== undefined) {
           const separator = DEFAULT_OUTPUT_SEPARATOR_FORMAT.replace(
             '{filePath}',
             relativePathForDisplay,
           );
-          contentParts.push(`${separator}\n\n${fileReadResult.llmContent}\n\n`);
+          contentParts.push(`${separator}\n\n${fileReadResult.llmContent.text}\n\n`);
         } else {
           contentParts.push(fileReadResult.llmContent); // This is a Part for image/pdf
         }
         processedFilesRelativePaths.push(relativePathForDisplay);
         const lines =
-          typeof fileReadResult.llmContent === 'string'
-            ? fileReadResult.llmContent.split('\n').length
+          fileReadResult.llmContent.text !== undefined
+            ? fileReadResult.llmContent.text.split('\n').length
             : undefined;
         const mimetype = getSpecificMimeType(filePath);
         recordFileOperationMetric(
@@ -482,9 +482,9 @@ Use this tool when the user's query implies needing the content of several files
     }
 
     if (contentParts.length === 0) {
-      contentParts.push(
-        'No files matching the criteria were found or all were skipped.',
-      );
+      contentParts.push({
+        text: 'No files matching the criteria were found or all were skipped.',
+      });
     }
     return {
       llmContent: contentParts,

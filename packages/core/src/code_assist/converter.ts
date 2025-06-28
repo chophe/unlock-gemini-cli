@@ -126,7 +126,7 @@ export function fromGenerateContentResponse(
   res: CaGenerateContentResponse,
 ): GenerateContentResponse {
   const inres = res.response;
-  const out = new GenerateContentResponse();
+  const out = new GenerateContentResponse(inres);
   out.candidates = inres.candidates;
   out.automaticFunctionCallingHistory = inres.automaticFunctionCallingHistory;
   out.promptFeedback = inres.promptFeedback;
@@ -139,7 +139,11 @@ function toVertexGenerateContentRequest(
 ): VertexGenerateContentRequest {
   return {
     contents: toContents(req.contents),
-    systemInstruction: maybeToContent(req.config?.systemInstruction),
+    systemInstruction: req.config?.systemInstruction 
+      ? (typeof req.config.systemInstruction === 'string' 
+          ? { role: 'user', parts: [{ text: req.config.systemInstruction }] }
+          : req.config.systemInstruction)
+      : undefined,
     cachedContent: req.config?.cachedContent,
     tools: req.config?.tools,
     toolConfig: req.config?.toolConfig,
@@ -217,7 +221,7 @@ function toVertexGenerationConfig(
     maxOutputTokens: config.maxOutputTokens,
     stopSequences: config.stopSequences,
     responseLogprobs: config.responseLogprobs,
-    logprobs: config.logprobs,
+    logprobs: config.logprobs ? 1 : undefined,
     presencePenalty: config.presencePenalty,
     frequencyPenalty: config.frequencyPenalty,
     seed: config.seed,

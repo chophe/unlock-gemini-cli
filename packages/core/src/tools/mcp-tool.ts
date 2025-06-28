@@ -81,7 +81,7 @@ export class DiscoveredMCPTool extends BaseTool<ToolParams, ToolResult> {
       },
     ];
 
-    const responseParts: Part[] = await this.mcpTool.callTool(functionCalls);
+    const responseParts: Part[] = await this.mcpTool?.callTool?.(functionCalls) || [];
 
     return {
       llmContent: responseParts,

@@ -151,8 +151,8 @@ export class ReadFileTool extends BaseTool<ReadFileToolParams, ToolResult> {
     }
 
     const lines =
-      typeof result.llmContent === 'string'
-        ? result.llmContent.split('\n').length
+      result.llmContent.text !== undefined
+        ? result.llmContent.text.split('\n').length
         : undefined;
     const mimetype = getSpecificMimeType(params.absolute_path);
     recordFileOperationMetric(
@@ -164,7 +164,7 @@ export class ReadFileTool extends BaseTool<ReadFileToolParams, ToolResult> {
     );
 
     return {
-      llmContent: result.llmContent,
+      llmContent: [result.llmContent],
       returnDisplay: result.returnDisplay,
     };
   }
